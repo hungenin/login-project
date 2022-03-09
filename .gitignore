@@ -1,0 +1,13 @@
+# hidden files & directories except gitignore
+.*
+!.gitignore
+
+# java classes
+*.class
+
+# intelliJ
+out/
+
+# maven
+*.iml
+target/
