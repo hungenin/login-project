@@ -1,3 +1,8 @@
 # hidden files & directories except gitignore
 .*
 !.gitignore
+!.env
+
+# ignore NodeJS modules
+node_modules
+package-lock.json
