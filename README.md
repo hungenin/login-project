@@ -15,7 +15,6 @@ Backend api:
 
     To install modules, go to backend directory and run
         > npm install mongoose express jsonwebtoken dotenv bcryptjs
-        > npm install nodemon -D
 
     To run api
         > npm run start
