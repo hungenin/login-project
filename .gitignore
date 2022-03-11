@@ -4,5 +4,5 @@
 !.env
 
 # ignore NodeJS modules
-node_modules
-package-lock.json
+backend/node_modules
+backend/package-lock.json

@@ -4,9 +4,11 @@ const express = require("express");
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const auth = require("./service/auth");
+const cors = require("cors");
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const User = require("./model/user");
 
@@ -15,20 +17,24 @@ app.post("/register", async (req, res) => {
         const { user_name, password } = req.body;
 
         if (!(password && user_name)) {
-            return res.status(400).send("All input is required");
+            return res.status(400).send({
+                message: "All input is required"
+            });
         }
-  
-        const isUserExist = await User.findOne({ user_name: user_name });  
-        if (isUserExist) {
-            return res.status(409).send("User Already Exist. Please Login");
+        
+        const user = await User.findOne({ user_name: user_name });
+        if (user) {
+            return res.status(409).send({
+                message: "User name already Exist."
+            });
         }
-  
+
         bcrypt.hash(password, 10, async (err, hash) => {
             const newUser = await User.create({
-              user_name,
-              password: hash,
+                user_name,
+                password: hash,
             });
-
+            
             const userToken = jwt.sign(
                 {
                     user_id: newUser._id,
@@ -39,15 +45,21 @@ app.post("/register", async (req, res) => {
                     expiresIn: "2h",
                 }
             );
-            const user_dto = new Object();
-            user_dto.user_name = newUser.user_name;
-            user_dto.token = userToken;
-  
-            return res.status(201).json(user_dto);
+
+            const user_dto = {
+                user_name: newUser.user_name
+            };
+
+            return res.status(201).json({
+                message: "success",
+                token: userToken,
+                user: user_dto
+            });
         });
     } catch (err) {
-        console.log(err);
-        return res.status(500).send(err);
+        return res.status(500).send({
+            message: err
+        });
     }
 });
 
@@ -56,42 +68,56 @@ app.post("/login", async (req, res) => {
         const { user_name, password } = req.body;
 
         if (!(user_name && password)) {
-            res.status(400).send("All input is required");
+            return res.status(400).send({
+                message: "All input is required!"
+            });
         }
 
         const user = await User.findOne({ user_name: user_name });
-        
+
         if (user) {
-            bcrypt.compare(password, user.password, function(err, found) {
+            bcrypt.compare(password, user.password, function (err, found) {
                 if (found == true) {
                     const userToken = jwt.sign(
-                        { 
-                            user_id: user._id, 
-                            user_name: user.user_name 
+                        {
+                            user_id: user._id,
+                            user_name: user.user_name
                         },
                         process.env.TOKEN_KEY,
                         { expiresIn: "2h" }
                     );
-                    const user_dto = new Object();
-                    user_dto.user_name = user.user_name;
-                    user_dto.token = userToken;
 
-                    return res.status(200).json(user_dto);
+                    const user_dto = {
+                        user_name: user.user_name
+                    }
+
+                    return res.json({
+                        message: "success",
+                        token: userToken,
+                        user: user_dto
+                    });
                 } else {
-                    return res.status(400).send("Wrong password...");
+                    return res.status(400).send({
+                        message: "Wrong password!"
+                    });
                 }
             });
         } else {
-            return res.status(400).send("User not exist");
+            return res.status(400).send({
+                message: "User not exist!"
+            });
         }
-      } catch (err) {
-        console.log(err);
-        return res.status(500).send(err);
-      }
+    } catch (err) {
+        return res.status(500).send({
+            message: err
+        });
+    }
 });
 
-app.get("/welcome", auth, (req, res) => {
-    return res.status(200).send("Welcome " + req.user.user_name + "!");
+app.get("/user", auth, (req, res) => {
+    return res.json({
+        message: "You are not welcome!"
+    });
 });
 
 app.use("*", (req, res) => {
