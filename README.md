@@ -21,4 +21,9 @@ Backend api:
 
 
 Frontend client:
-    soon :)
+    To run client, go to frontend directory and run
+        > npm start
+
+
+Open page http://localhost:3000 in a browser!
+
