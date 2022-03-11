@@ -28,5 +28,5 @@ Frontend client:
         > npm start
 
 
-Open page http://localhost:3000 in a browser!
+
 
